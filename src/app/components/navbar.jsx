@@ -1,59 +1,107 @@
-import React from 'react';
-import Image from '../../../public/logo-icon.png';
+"use client";
+import { useState } from "react";
+import { Link, Button, Spinner } from "@heroui/react";
+import { signOut, useSession } from "@/lib/auth-client";
 
-const Navbar = () => {
+export default function Navbar() {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const { data: session, isPending } = useSession();
+
+    console.log('user session in Navbar', session);
+
+    if (isPending) {
+        return <div className="flex flex-col items-center gap-2">
+            <Spinner size="xl" />
+            <span className="text-xs text-muted">Loading...</span>
+        </div>;
+    }
+
+    const links = <>
+        <li>
+            <Link href="#">Features</Link>
+        </li>
+        <li>
+            <Link href="#" className="font-medium text-accent" aria-current="page">
+                Dashboard
+            </Link>
+        </li>
+        <li>
+            <Link href="#">Pricing</Link>
+        </li>
+    </>
+
+    const authLinks = <>
+        {
+            session?.user ? <>
+                <span>Welcome, {session.user?.name}</span>
+                <Button onClick={() => signOut()}>Sign Out</Button>
+
+            </> : <>
+                <Link href="/auth/sign-in">Sign In</Link>
+                <Link href="/auth/sign-up"><Button>Sign Up</Button></Link>
+
+            </>
+        }
+    </>
+
+
     return (
-        <h1>
-            This is the Navbar component
-        </h1>
-        // <div className="navbar bg-base-100 shadow-sm">
-        //     <div className="flex-1">
-        //         <a className="btn btn-ghost text-xl">daisyUI</a>
-        //     </div>
-        //     <div className="flex-none">
-        //         <div className="dropdown dropdown-end">
-        //             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-        //                 <div className="indicator">
-        //                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /> </svg>
-        //                     <span className="badge badge-sm indicator-item">8</span>
-        //                 </div>
-        //             </div>
-        //             <div
-        //                 tabIndex={0}
-        //                 className="card card-sm dropdown-content bg-base-100 z-1 mt-3 w-52 shadow">
-        //                 <div className="card-body">
-        //                     <span className="text-lg font-bold">8 Items</span>
-        //                     <span className="text-info">Subtotal: $999</span>
-        //                     <div className="card-actions">
-        //                         <button className="btn btn-primary btn-block">View cart</button>
-        //                     </div>
-        //                 </div>
-        //             </div>
-        //         </div>
-        //         <div className="dropdown dropdown-end">
-        //             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-        //                 <div className="w-10 rounded-full">
-        //                     <img
-        //                         alt="Tailwind CSS Navbar component"
-        //                         src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
-        //                 </div>
-        //             </div>
-        //             <ul
-        //                 tabIndex={-1}
-        //                 className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-        //                 <li>
-        //                     <a className="justify-between">
-        //                         Profile
-        //                         <span className="badge">New</span>
-        //                     </a>
-        //                 </li>
-        //                 <li><a>Settings</a></li>
-        //                 <li><a>Logout</a></li>
-        //             </ul>
-        //         </div>
-        //     </div>
-        // </div>
-    );
-};
+        <nav className="sticky top-0 z-40 w-full border-b border-separator bg-background/70 backdrop-blur-lg">
+            <header className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
+                <div className="flex items-center gap-4">
+                    <button
+                        className="md:hidden"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        aria-label="Toggle menu"
+                        aria-expanded={isMenuOpen}
+                    >
+                        <span className="sr-only">Menu</span>
+                        <svg
+                            className="h-6 w-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            {isMenuOpen ? (
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            ) : (
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 6h16M4 12h16M4 18h16"
+                                />
+                            )}
+                        </svg>
+                    </button>
+                    <div className="flex items-center gap-3">
 
-export default Navbar;
+                        <p className="font-bold">ACME</p>
+                    </div>
+                </div>
+                <ul className="hidden items-center gap-4 md:flex">
+                    {links}
+                </ul>
+                <div className="hidden items-center gap-4 md:flex">
+                    {authLinks}
+                </div>
+            </header>
+            {isMenuOpen && (
+                <div className="border-t border-separator md:hidden">
+                    <ul className="flex flex-col gap-2 p-4">
+                        {links}
+                        <li className="mt-4 flex flex-col gap-2 border-t border-separator pt-4">
+                            {authLinks}
+                        </li>
+                    </ul>
+                </div>
+            )}
+        </nav>
+    );
+}
